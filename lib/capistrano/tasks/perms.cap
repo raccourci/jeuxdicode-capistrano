@@ -1,0 +1,33 @@
+namespace :perms do
+    desc 'Positionnement des droits ACL'
+    task :acl do
+        on roles(:web) do
+            if fetch(:acl_dirs)
+                fetch(:acl_dirs).each do | acl_dir |
+                    within release_path do
+                        execute :sudo, "chown admin:www-data -R #{acl_dir}"
+                        execute :sudo, "find #{acl_dir} -type d -print0 | sudo xargs -0 -r chmod 775"
+                        execute :sudo, "find #{acl_dir} -type f -print0 | sudo xargs -0 -r chmod 664"
+                        execute :sudo, "setfacl -R -m u:www-data:rwx -m u:admin:rwx #{acl_dir}"
+                        execute :sudo, "setfacl -dR -m u:www-data:rwx -m u:admin:rwx #{acl_dir}"
+                    end
+                end
+            end
+        end
+    end
+
+    desc 'Positionnement des droits www-data'
+    task :wwwdata do
+        on roles(:web) do
+            if fetch(:linked_dirs)
+                fetch(:linked_dirs).each do | linked_dir |
+                    within shared_path do
+                        execute :sudo, "chown www-data:www-data -R #{linked_dir}"
+                        execute :sudo, "find #{linked_dir} -type d -print0 | sudo xargs -0 -r chmod 775"
+                        execute :sudo, "find #{linked_dir} -type f -print0 | sudo xargs -0 -r chmod 664"
+                    end
+                end
+            end
+        end
+    end
+end

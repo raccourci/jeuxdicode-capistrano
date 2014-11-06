@@ -1,0 +1,8 @@
+namespace :varnish do
+    desc 'Restart Varnish'
+    task :restart do
+        on roles(:cache) do |fqdn|
+            execute :sudo, "service", "varnish", "restart"
+        end
+    end
+end

@@ -1,0 +1,19 @@
+namespace :php do
+    desc 'Clear APC Cache'
+    task :apc_clear do
+        on roles(:web) do |fqdn|
+            if "#{fetch(:stage)}" == 'dev'
+                execute :curl, "http://#{fqdn}:8080/apc/clear.php?#{release_timestamp}", "--silent"
+            else
+                execute :curl, "http://#{fqdn}/apc/clear.php?#{release_timestamp}", "--silent"
+            end
+        end
+    end
+
+    desc 'Restart PHP5 FPM'
+    task :fpm_restart do
+        on roles(:web) do |fqdn|
+            execute :sudo, "service", "php5-fpm", "restart"
+        end
+    end
+end

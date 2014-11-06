@@ -1,0 +1,20 @@
+namespace :robots do
+    desc "Added robots.txt on websites to disallow"
+    task :disallow do
+        on roles(:web) do
+            if "#{fetch(:stage)}" != 'prod'
+                require 'erb'
+
+                default_template = File.join(File.expand_path('../../templates', __FILE__), 'robots.txt.erb')
+                template = fetch(:robots_template_path, default_template)
+                result = ERB.new(File.read(template)).result(binding)
+
+                rendered_path = "#{current_path}/#{fetch(:robots_path)}"
+                rendered_name = "robots.txt"
+
+                upload!(StringIO.new(result), rendered_path + rendered_name)
+                execute "chmod 644 #{rendered_path + rendered_name}"
+            end
+        end
+    end
+end

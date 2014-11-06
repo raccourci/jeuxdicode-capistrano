@@ -1,0 +1,25 @@
+namespace :puppet do
+  desc 'Puppet Apply'
+  task :apply do
+    on roles(:all) do |fqdn|
+      if !fetch(:puppet_cluster)
+        error "PUPPET CLUSTER not defined #{fetch(:puppet_cluster)}"
+        exit 0
+      else
+        info "PUPPET CLUSTER >> #{fetch(:puppet_cluster)}"
+      end
+
+      if !fetch(:puppet_env)
+        fatal "PUPPET ENV not defined #{fetch(:puppet_env)}"
+        exit 0
+      else
+        info "PUPPET ENV >> #{fetch(:puppet_env)}"
+      end
+
+      info "PUPPET FQDN >> #{fqdn}"
+
+      info "PUPPET apply..."
+      execute "sudo FACTER_fqdn='#{fqdn}' FACTER_env='#{fetch(:puppet_env)}' FACTER_roles='#{host.roles.to_a.join(',')}' FACTER_cluster='#{fetch(:puppet_cluster)}' FACTER_hieradata_dir='/home/admin/puppet/current/hieradata' puppet apply /home/admin/puppet/current/manifests/default.pp --modulepath=/home/admin/puppet/current/modules --hiera_config /home/admin/puppet/current/hiera.yaml --parser=future"
+    end
+  end
+end
